@@ -72,7 +72,7 @@ Write-Host "Retrieving sign-in logs..." -ForegroundColor Cyan
 
 try {
     # Get sign-in logs
-    $signInLogs = Get-MgAuditLogSignIn -All
+    $signInLogs = Get-MgAuditLogSignIn -All | Where-Object { $_.CreatedDateTime -gt (Get-Date).AddDays(-7) }
     
     if ($signInLogs) {
         Write-Host "Found $($signInLogs.Count) sign-in log(s)" -ForegroundColor Green
