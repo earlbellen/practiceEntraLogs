@@ -1,0 +1,9 @@
+# Ignore CSV output files
+*.csv
+
+# Ignore environment files with secrets
+.env
+*.env
+
+# Ignore PowerShell artifacts
+*.ps1.bak
