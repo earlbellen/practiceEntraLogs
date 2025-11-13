@@ -14,6 +14,12 @@
 Import-Module Microsoft.Graph.Reports -ErrorAction Stop
 
 # -----------------------------------------------------------------------------
+# Configuration
+# -----------------------------------------------------------------------------
+# Number of days to retrieve sign-in logs (from today backwards)
+$DaysToRetrieve = 7
+
+# -----------------------------------------------------------------------------
 # Application credentials (easy to find and swap)
 # Set your TenantId, ClientId and ClientSecret here. Replace the placeholders below
 # or set the TENANT_ID, CLIENT_ID and CLIENT_SECRET environment variables.
@@ -79,9 +85,9 @@ $outputFile = Join-Path -Path $scriptDir -ChildPath "SignInLogs_$timestamp.csv"
 Write-Host "Retrieving sign-in logs..." -ForegroundColor Cyan
 
 try {
-    # Define a date range (last 7 days). Adjust as needed.
+    # Define a date range using the configured number of days
     $EndDate   = Get-Date
-    $StartDate = $EndDate.AddDays(-7)
+    $StartDate = $EndDate.AddDays(-$DaysToRetrieve)
 
     Write-Host "Retrieving sign-in logs from $($StartDate.ToShortDateString()) to $($EndDate.ToShortDateString()) (daily batches)..." -ForegroundColor Cyan
 
