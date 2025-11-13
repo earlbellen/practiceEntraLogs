@@ -10,27 +10,8 @@
     .\signInLogs-Delegated.ps1
 #>
 
-# Handle assembly loading conflicts by using a fresh PowerShell process if needed
-$needsNewProcess = $false
-
-try {
-    # Check if Microsoft.Graph.Reports is already loaded
-    if (Get-Module -Name 'Microsoft.Graph.Reports' -ErrorAction SilentlyContinue) {
-        Write-Host "Microsoft.Graph.Reports already loaded" -ForegroundColor Yellow
-    }
-    else {
-        # Try to import with minimal dependencies
-        Import-Module Microsoft.Graph.Reports -ErrorAction Stop
-    }
-}
-catch {
-    Write-Host "Module loading failed in current session. This is likely due to assembly version conflicts." -ForegroundColor Yellow
-    Write-Host "Please try one of the following:" -ForegroundColor Cyan
-    Write-Host "1. Close all PowerShell windows and start a fresh session" -ForegroundColor Cyan
-    Write-Host "2. Run: Remove-Module Microsoft.Graph.* -Force -ErrorAction SilentlyContinue" -ForegroundColor Cyan
-    Write-Host "3. Run this script in a new PowerShell process" -ForegroundColor Cyan
-    exit 1
-}
+# Import Microsoft Graph Reports module
+Import-Module Microsoft.Graph.Reports -ErrorAction Stop
 
 # -----------------------------------------------------------------------------
 # Tenant configuration (easy to find and swap)
