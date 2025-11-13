@@ -20,8 +20,8 @@ Import-Module Microsoft.Graph.Reports -ErrorAction Stop
 # IMPORTANT: Keep secrets out of source control; prefer environment variables or a secure vault.
 # -----------------------------------------------------------------------------
 $TenantId     = '56821385-e70b-48f2-9c95-997eaa9dd9aa'
-$ClientId     = '1cd24644-3b7d-4885-85c1-31abca8d896e' # e.g. '00000000-0000-0000-0000-000000000000'
-$ClientSecret = '56821385-e70b-48f2-9c95-997eaa9dd9aa' # e.g. 'your-client-secret-here'
+$ClientId     = '' # e.g. '00000000-0000-0000-0000-000000000000'
+$ClientSecret = '' # e.g. 'your-client-secret-here'
 
 # Allow environment variables to override the inline values for non-interactive runs
 if ($env:TENANT_ID)     { $TenantId     = $env:TENANT_ID }
