@@ -18,7 +18,7 @@ Import-Module Microsoft.Graph.Reports -ErrorAction Stop
 # Set your tenant ID here. Replace the GUID below with a different tenant ID as needed.
 # You can also override this by setting the TENANT_ID environment variable.
 # -----------------------------------------------------------------------------
-$TenantId = '56821385-e70b-48f2-9c95-997eaa9dd9aa'
+$TenantId = '52f15f01-029d-42ed-a4a8-1a2cf73a3dbf'
 
 
 # Ensure authentication before proceeding
@@ -71,15 +71,47 @@ $outputFile = Join-Path -Path $scriptDir -ChildPath "SignInLogs_$timestamp.csv"
 Write-Host "Retrieving sign-in logs..." -ForegroundColor Cyan
 
 try {
-    # Get sign-in logs
-    $signInLogs = Get-MgAuditLogSignIn -All | Where-Object { $_.CreatedDateTime -gt (Get-Date).AddDays(-7) }
-    
-    if ($signInLogs) {
-        Write-Host "Found $($signInLogs.Count) sign-in log(s)" -ForegroundColor Green
-        
+    # Define a date range (last 7 days). Adjust as needed.
+    $EndDate   = Get-Date
+    $StartDate = $EndDate.AddDays(-7)
+
+    Write-Host "Retrieving sign-in logs from $($StartDate.ToShortDateString()) to $($EndDate.ToShortDateString()) (daily batches)..." -ForegroundColor Cyan
+
+    $allLogs = @()
+
+    for ($day = $StartDate.Date; $day -lt $EndDate.Date.AddDays(1); $day = $day.AddDays(1)) {
+        $next = $day.AddDays(1)
+        $filter = "createdDateTime ge $($day.ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ')) and createdDateTime lt $($next.ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ'))"
+
+        $attempt = 0
+        $maxAttempts = 3
+        while ($attempt -lt $maxAttempts) {
+            $attempt++
+            try {
+                # Fetch one day's worth of sign-in logs (smaller payloads reduce timeout risk)
+                $batch = Get-MgAuditLogSignIn -Filter $filter -All -ErrorAction Stop
+                if ($batch) { $allLogs += $batch }
+                Write-Host "  $($day.ToShortDateString()): $($batch.Count) log(s)" -ForegroundColor Green
+                break
+            }
+            catch {
+                Write-Host "  Attempt $attempt failed for $($day.ToShortDateString()): $_" -ForegroundColor Yellow
+                if ($attempt -lt $maxAttempts) {
+                    Start-Sleep -Seconds 5
+                }
+                else {
+                    Write-Host "  Giving up on $($day.ToShortDateString()) after $maxAttempts attempts." -ForegroundColor Red
+                }
+            }
+        }
+    }
+
+    if ($allLogs.Count -gt 0) {
+        Write-Host "Found $($allLogs.Count) sign-in log(s) total" -ForegroundColor Green
+
         # Export to CSV
-        $signInLogs | Export-Csv -Path $outputFile -NoTypeInformation -Encoding UTF8
-        
+        $allLogs | Export-Csv -Path $outputFile -NoTypeInformation -Encoding UTF8
+
         Write-Host "Sign-in logs exported successfully to: $outputFile" -ForegroundColor Green
     }
     else {
