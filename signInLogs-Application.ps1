@@ -114,23 +114,13 @@ try {
         }
     }
 
-        # Export to CSV
+    # Export to CSV
+    if ($allLogs.Count -gt 0) {
         $allLogs | Export-Csv -Path $outputFile -NoTypeInformation -Encoding UTF8
+        Write-Host "Exported $($allLogs.Count) sign-in log(s) to: $outputFile" -ForegroundColor Green
+    }
     else {
-        # -----------------------------------------------------------------------------
-        # Application credentials (read from environment only)
-        # IMPORTANT: Do not hard-code secrets in source control.
-        # Set these environment variables before running:
-        #   TENANT_ID, CLIENT_ID, CLIENT_SECRET
-        # -----------------------------------------------------------------------------
-        $TenantId     = $env:TENANT_ID
-        $ClientId     = $env:CLIENT_ID
-        $ClientSecret = $env:CLIENT_SECRET
         Write-Host "No sign-in logs found." -ForegroundColor Yellow
-        if (-not $TenantId -or -not $ClientId -or -not $ClientSecret) {
-            Write-Host "Missing credentials. Set TENANT_ID, CLIENT_ID and CLIENT_SECRET environment variables before running." -ForegroundColor Red
-            exit 1
-        }
     }
 }
 catch {
